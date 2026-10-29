@@ -339,12 +339,26 @@ export function yAxisLabelFormatter(
 		return `${value}`
 	}
 
-	if (unit.type === VisualizationCoreUnit.Custom && unit.custom) {
-		return `${value} ${unit.custom.slice(0, VISUALIZATION_MAX_CUSTOM_UNIT_LENGTH)}`
-	}
-
 	const formatScaledNumber = (num: number) =>
 		`${truncToDecimals(num, decimals)}`
+
+	// abbreviates large values with K, M, B and T (e.g. 1234567 -> 1.235M)
+	const formatShortNumber = (num: number) => {
+		const suffixes = ["", "K", "M", "B", "T"]
+		let scaled = num
+		let index = 0
+
+		while (index < suffixes.length - 1 && Math.abs(scaled) >= 1000) {
+			scaled /= 1000
+			index += 1
+		}
+
+		return `${formatScaledNumber(scaled)}${suffixes[index] ?? ""}`
+	}
+
+	if (unit.type === VisualizationCoreUnit.Custom && unit.custom) {
+		return `${formatShortNumber(value)} ${unit.custom.slice(0, VISUALIZATION_MAX_CUSTOM_UNIT_LENGTH)}`
+	}
 
 	type ScalableUnit = VisualizationTimeUnit | VisualizationDataUnit
 	interface UnitScale {
@@ -471,7 +485,7 @@ export function yAxisLabelFormatter(
 			return `${value * 100}%`
 	}
 
-	return `${value}`
+	return formatShortNumber(value)
 }
 
 /**
