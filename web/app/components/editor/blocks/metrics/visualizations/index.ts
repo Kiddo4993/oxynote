@@ -98,6 +98,12 @@ function truncToDecimals(num: number, decimals: number | null) {
 		}
 	}
 
+	// toFixed throws above 100 digits. Values that small print in exponent
+	// form anyway.
+	if (decimals > 100) {
+		return num
+	}
+
 	return parseFloat(num.toFixed(decimals))
 }
 
@@ -347,13 +353,16 @@ export function yAxisLabelFormatter(
 		const suffixes = ["", "K", "M", "B", "T"]
 		let scaled = num
 		let index = 0
+		let formatted = truncToDecimals(scaled, decimals)
 
-		while (index < suffixes.length - 1 && Math.abs(scaled) >= 1000) {
+		// check the rounded value, so 999999.9 becomes 1M and not 1000K
+		while (index < suffixes.length - 1 && Math.abs(formatted) >= 1000) {
 			scaled /= 1000
 			index += 1
+			formatted = truncToDecimals(scaled, decimals)
 		}
 
-		return `${formatScaledNumber(scaled)}${suffixes[index] ?? ""}`
+		return `${formatted}${suffixes[index] ?? ""}`
 	}
 
 	if (unit.type === VisualizationCoreUnit.Custom && unit.custom) {

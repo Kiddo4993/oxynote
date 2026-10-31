@@ -667,8 +667,11 @@ describe("yAxisLabelFormatter", () => {
 		{ value: 3e9, expected: "3B" },
 		{ value: 4.5e12, expected: "4.5T" },
 		{ value: 1e15, expected: "1000T" },
+		{ value: 999.9999, expected: "1K" },
+		{ value: 999999.9, expected: "1M" },
 		{ value: 0, expected: "0" },
 		{ value: 12.345678, expected: "12.346" },
+		{ value: 1e-99, expected: "1e-99" },
 	])(
 		"abbreviates a unitless $value to $expected",
 		({ value, expected }, { expect }) => {
